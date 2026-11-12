@@ -1,264 +1,137 @@
-# AutoTech Solutions - Sistema de Gestión de Taller Automotriz
-
+# Universidad Tecnológica de Honduras (UTH)
+### Facultad de Ingeniería en Computación
 **Asignatura:** Programación Avanzada I  
-**Catedrático:** Master Kevin Alexander Maradiaga  
-**Modalidad:** Examen Práctico Integrador Java  
+**Docente:** Kevin Alexander Maradiaga  
+**Estudiante:** Hector Joann Murillo Mejia  
+**Cuenta:** 202210060221  
+**Trabajo:** Informe Proyecto Examen Segundo Parcial  
 **Repositorio GitHub:** [https://github.com/jomudev/AutoTechSolutions-Taller](https://github.com/jomudev/AutoTechSolutions-Taller)
 
 ---
 
-## 1. Descripción del Proyecto
+## 1. Introducción y Enunciado General
+Este proyecto consiste en el desarrollo de un sistema de escritorio para el taller automotriz **AutoTech Solutions**, correspondiente al examen práctico integrador de la clase Programación Avanzada I. El propósito del programa es automatizar la administración del taller, permitiendo registrar clientes, vehículos, controlar el inventario de repuestos, procesar órdenes de trabajo, generar facturas y visualizar reportes estadísticos.
 
-El sistema es una aplicación de escritorio desarrollada en **Java con interfaz gráfica Swing**, diseñada para la administración integral de las operaciones del taller automotriz **AutoTech Solutions**.
-
-Implementa persistencia exclusivamente en **memoria RAM** utilizando estructuras de datos fundamentales (`ArrayList`, `HashMap`, `Stack`), programación genérica (`RepositorioGenerico<T>`), excepciones personalizadas, programación multihilo y generación de gráficos estadísticos 2D manuales con `Graphics2D` sin bibliotecas externas.
+Siguiendo las instrucciones del examen, el sistema no utiliza bases de datos externas ni archivos de texto; toda la información se maneja exclusivamente en memoria RAM. Para cumplir con los requerimientos técnicos, se aplicaron conceptos de programación orientada a objetos (POO), clases genéricas (`RepositorioGenerico<T>`), colecciones (`ArrayList`, `HashMap`, `Stack`), excepciones personalizadas, multihilos para tareas en segundo plano y gráficos generados con Java 2D.
 
 ---
 
-## 2. Arquitectura del Software (Patrón MVC)
+## 2. Arquitectura del Software y Organización en Paquetes
+El código se organizó utilizando el patrón Modelo-Vista-Controlador (MVC) para separar la lógica del negocio de la interfaz gráfica y los datos. El proyecto se divide en los siguientes paquetes:
 
-El código fuente está estrictamente organizado según las pautas de clase en los siguientes paquetes:
-
-* **`main`**: Clase principal `Main.java` encargada de inicializar el Look & Feel y levantar la interfaz en el Event Dispatch Thread (EDT).
-* **`modelo`**: Clases del dominio del negocio:
-  * `Cliente.java` (Código, nombre, identidad, teléfono, dirección).
-  * `Vehiculo.java` (Placa, marca, modelo, año, color, cliente propietario).
-  * `Servicio.java` (Código, descripción, precio base, tiempo estimado).
-  * `Repuesto.java` (Código, nombre, cantidad, precio unitario, stock mínimo).
-  * `DetalleRepuesto.java` (Repuesto asignado, cantidad y subtotal).
-  * `EstadoOrden.java` (Enum: `PENDIENTE`, `EN_PROCESO`, `FINALIZADA`, `CANCELADA`).
-  * `OrdenTrabajo.java` (Número, cliente, vehículo, diagnóstico, mecánico, servicios, repuestos, estado, control de inventario).
-  * `Factura.java` (Número de factura, orden asociada, subtotales, impuesto configurable, total, efectivo y cambio).
-* **`repositorio`**:
-  * `RepositorioGenerico<T>.java`: Implementación reutilizable con `ArrayList` para listados ordenados, `HashMap` para indexación y búsquedas O(1), y `Stack` para deshacer (Undo) asegurando consistencia en todas las estructuras.
-* **`controlador`**:
-  * `TallerControlador.java`: Orquesta los repositorios, las validaciones de negocio, el cálculo de facturas, el control de inventario y la ejecución asíncrona de los hilos.
-* **`vista`**:
-  * `VentanaPrincipal.java`: Ventana central con navegación por pestañas (`JTabbedPane`), tablas `JTable`, formularios, validaciones visuales y barra de progreso.
-  * `CanvasReporte2D.java`: Panel personalizado que hereda de `JPanel` y sobreescribe `paintComponent(Graphics g)` para dibujar manualmente gráficos de barras mediante `Graphics2D`.
-* **`excepciones`**: Excepciones personalizadas requeridas:
-  * `StockInsuficienteException.java`: Rechaza consumos de inventario superiores al stock disponible.
-  * `ClienteNoEncontradoException.java`: Disparada al buscar o asociar un cliente inexistente.
-  * `PagoInsuficienteException.java`: Rechaza pagos en efectivo inferiores al total facturado.
-* **`hilos`**:
-  * `ProcesoServicioHilo.java`: Implementa `Runnable` para simular las 10 etapas del servicio automotriz (duración total > 5 segundos), actualizando la interfaz vía `SwingUtilities.invokeLater` sin congelar la ventana y bloqueando ejecuciones duplicadas.
+* **`main`**: Contiene la clase `Main.java`, donde inicia la ejecución del programa, se configura el Look and Feel (Nimbus) y se abre la ventana principal dentro del Event Dispatch Thread (EDT).
+* **`modelo`**: Contiene las clases que representan los datos del sistema: `Cliente`, `Vehiculo`, `Servicio`, `Repuesto`, `DetalleRepuesto`, `OrdenTrabajo`, `Factura` y el enum `EstadoOrden`.
+* **`repositorio`**: Incluye la clase `RepositorioGenerico<T>`, utilizada para almacenar los registros en memoria. Utiliza un `ArrayList` para mostrar los datos en las tablas, un `HashMap` para realizar búsquedas rápidas por clave (código o placa) y un `Stack` para la función de deshacer (Undo).
+* **`controlador`**: Contiene `TallerControlador.java`, que se encarga de aplicar las reglas de validación, comunicar la vista con los repositorios, gestionar la facturación y lanzar los hilos de procesamiento.
+* **`vista`**: Incluye `VentanaPrincipal.java`, que contiene los formularios con pestañas (`JTabbedPane`), tablas y botones de la interfaz, y `CanvasReporte2D.java`, un panel que dibuja los gráficos de barras usando `paintComponent()` y `Graphics2D`.
+* **`excepciones`**: Contiene las excepciones personalizadas del proyecto: `StockInsuficienteException`, `ClienteNoEncontradoException` y `PagoInsuficienteException`.
+* **`hilos`**: Contiene la clase `ProcesoServicioHilo.java`, que implementa `Runnable` para simular la atención técnica del vehículo durante al menos 5 segundos en segundo plano, sin bloquear la interfaz.
 
 ---
 
 ## 3. Diagrama UML de Clases
+A continuación se muestra el diagrama de clases del sistema, donde se representan las entidades creadas, sus atributos, métodos principales y las relaciones de asociación, composición y dependencia entre cada módulo:
 
-```mermaid
-classDiagram
-    direction TB
+![Diagrama UML de Clases](capturas/00_diagrama_clases_uml.png)
 
-    class RepositorioGenerico~T~ {
-        -List~T~ listaElementos
-        -Map~String, T~ mapaElementos
-        -Stack~Operacion~ historialOperaciones
-        +agregar(String clave, T elemento) void
-        +obtenerTodos() List~T~
-        +buscarPorClave(String clave) T
-        +existe(String clave) boolean
-        +eliminar(String clave) void
-        +deshacerUltimo() T
-        +puedeDeshacer() boolean
-    }
-
-    class Cliente {
-        -String codigo
-        -String nombreCompleto
-        -String identidad
-        -String telefono
-        -String direccion
-        +getCodigo() String
-        +getNombreCompleto() String
-    }
-
-    class Vehiculo {
-        -String placa
-        -String marca
-        -String modelo
-        -int anio
-        -String color
-        -Cliente propietario
-        +getPlaca() String
-        +getPropietario() Cliente
-    }
-
-    class Servicio {
-        -String codigo
-        -String descripcion
-        -double precioBase
-        -int tiempoEstimadoMinutos
-    }
-
-    class Repuesto {
-        -String codigo
-        -String nombre
-        -int cantidad
-        -double precioUnitario
-        -int stockMinimo
-        +registrarEntrada(int unidades) void
-        +descontarExistencia(int unidades) void
-        +tieneAlertaStockBajo() boolean
-    }
-
-    class DetalleRepuesto {
-        -Repuesto repuesto
-        -int cantidad
-        -double precioUnitario
-        +getSubtotal() double
-    }
-
-    class OrdenTrabajo {
-        -String numeroOrden
-        -String fecha
-        -Cliente cliente
-        -Vehiculo vehiculo
-        -String diagnostico
-        -String mecanico
-        -List~Servicio~ servicios
-        -List~DetalleRepuesto~ repuestos
-        -double costoTotal
-        -EstadoOrden estado
-        -boolean inventarioDescontado
-        -boolean enProceso
-        -boolean facturada
-        +calcularSubtotalServicios() double
-        +calcularSubtotalRepuestos() double
-        +recalcularCostoTotal() void
-    }
-
-    class Factura {
-        -String numeroFactura
-        -String fecha
-        -OrdenTrabajo ordenTrabajo
-        -double subtotalServicios
-        -double subtotalRepuestos
-        -double porcentajeImpuesto
-        -double montoImpuesto
-        -double total
-        -double efectivoRecibido
-        -double cambio
-    }
-
-    class ProcesoServicioHilo {
-        -OrdenTrabajo orden
-        -Listener listener
-        -Runnable accionFinalizar
-        +run() void
-    }
-
-    class TallerControlador {
-        -RepositorioGenerico~Cliente~ repoClientes
-        -RepositorioGenerico~Vehiculo~ repoVehiculos
-        -RepositorioGenerico~Servicio~ repoServicios
-        -RepositorioGenerico~Repuesto~ repoRepuestos
-        -RepositorioGenerico~OrdenTrabajo~ repoOrdenes
-        -RepositorioGenerico~Factura~ repoFacturas
-        +registrarCliente() void
-        +registrarVehiculo() void
-        +crearOrden() OrdenTrabajo
-        +finalizarOrden(String numero) void
-        +procesarOrdenConHilo() void
-        +generarFactura() Factura
-        +obtenerIngresosPorServicio() Map
-        +obtenerOrdenesPorEstado() Map
-    }
-
-    class VentanaPrincipal {
-        -TallerControlador controlador
-        -CanvasReporte2D canvasReporte
-        +actualizarTodasLasTablas() void
-    }
-
-    class CanvasReporte2D {
-        -Map~String, Double~ ingresosPorServicio
-        -Map~String, Integer~ ordenesPorEstado
-        +paintComponent(Graphics g) void
-        +setDatos(Map ingresos, Map estados) void
-    }
-
-    Vehiculo --> Cliente : Propietario
-    OrdenTrabajo --> Cliente : Cliente
-    OrdenTrabajo --> Vehiculo : Vehiculo
-    OrdenTrabajo *-- Servicio : Lista Servicios
-    OrdenTrabajo *-- DetalleRepuesto : Lista Repuestos
-    DetalleRepuesto --> Repuesto : Repuesto
-    Factura --> OrdenTrabajo : Orden Asociada
-    ProcesoServicioHilo --> OrdenTrabajo : Procesa
-
-    TallerControlador --> RepositorioGenerico : Contiene Repositorios
-    VentanaPrincipal --> TallerControlador : Usa
-    VentanaPrincipal --> CanvasReporte2D : Muestra Graficos
-```
+En el diagrama se destacan las siguientes relaciones:
+* **Vehículo - Cliente:** Cada objeto `Vehiculo` guarda una referencia al `Cliente` que es su dueño.
+* **Orden de Trabajo:** La clase `OrdenTrabajo` contiene listas de `Servicio` y `DetalleRepuesto`, sumando los subtotales para calcular el costo total de la orden.
+* **Facturación:** La clase `Factura` se asocia con una `OrdenTrabajo` en estado finalizada para calcular los subtotales, el impuesto y el total a pagar.
+* **Controlador y Repositorios:** `TallerControlador` maneja las instancias de `RepositorioGenerico<T>` para cada modelo y sirve de enlace con la `VentanaPrincipal`.
 
 ---
 
-## 4. Guía de Demostración Paso a Paso y Capturas de Pantalla
+## 4. Cumplimiento de los Requerimientos Funcionales
+* **Módulo 1: Clientes**  
+  Permite registrar, buscar, modificar y eliminar clientes. Valida que no queden campos vacíos (código, nombre, identidad, teléfono, dirección) y evita que se repitan códigos ya registrados.
 
-### Paso 1: Gestión de Clientes (Módulo 1)
-Se registra un cliente con código único (`CLI-001`), nombre completo, identidad, teléfono y dirección. El sistema valida campos obligatorios y códigos duplicados.
-![Gestión de Clientes](capturas/01_gestion_clientes.png)
+* **Módulo 2: Vehículos**  
+  Registra vehículos vinculándolos a un cliente mediante una lista desplegable. Valida que la placa no esté duplicada, permite buscar por placa y filtrar los vehículos de un cliente en específico.
 
----
+* **Módulo 3: Servicios mecánicos**  
+  Incluye el catálogo con los 5 servicios requeridos: cambio de aceite (L. 850.00), revisión de frenos (L. 1,200.00), diagnóstico electrónico (L. 950.00), alineamiento (L. 1,100.00) y mantenimiento general (L. 2,500.00). Permite ingresar nuevos servicios validando que el precio sea mayor a cero.
 
-### Paso 2: Gestión de Vehículos (Módulo 2)
-Se registra el vehículo con placa `HAA-1234` asociándolo al cliente propietario registrado previamente. Permite búsqueda por placa y filtrado de vehículos por cliente.
-![Gestión de Vehículos](capturas/02_gestion_vehiculos.png)
+* **Módulo 4: Inventario**  
+  Controla los repuestos con su código, nombre, cantidad, precio unitario y stock mínimo. Permite registrar entradas de unidades, no acepta números negativos y muestra alertas cuando el inventario baja del mínimo o se agota.
 
----
+* **Módulo 5: Órdenes de trabajo**  
+  Permite crear órdenes asignando cliente, vehículo, diagnóstico, mecánico, servicios y repuestos. El costo total se calcula automáticamente sumando ambos conceptos. Los repuestos se descuentan del inventario una sola vez cuando la orden pasa a estado Finalizada.
 
-### Paso 3: Catálogo de Servicios Mecánicos (Módulo 3)
-El catálogo incluye los servicios obligatorios: Cambio de aceite, Revisión de frenos, Diagnóstico electrónico, Alineamiento y Mantenimiento general, validando precios mayores a cero.
-![Servicios Mecánicos](capturas/03_servicios_mecanicos.png)
+* **Módulo 6: Facturación**  
+  Genera la factura únicamente si la orden está finalizada. Separa los subtotales de mano de obra y repuestos, aplica el 15% de impuesto (configurable) y calcula el cambio según el efectivo entregado.
 
----
+* **Módulo 7: Reportes Java 2D**  
+  Utiliza una clase que hereda de `JPanel` y sobreescribe `paintComponent()`. Con `Graphics2D` se dibujan dos gráficos de barras con los datos en memoria: uno para los ingresos por servicio y otro para la cantidad de órdenes por estado.
 
-### Paso 4: Inventario de Repuestos (Módulo 4)
-Administración de repuestos con control de existencia, precio unitario, stock mínimo, entradas de almacén y alertas automáticas de existencia baja o agotada.
-![Inventario de Repuestos](capturas/04_inventario_repuestos.png)
+* **Módulo 8: Genéricos y colecciones**  
+  La clase `RepositorioGenerico<T>` utiliza un `ArrayList` para llenar los `JTable`, un `HashMap` para buscar rápidamente por ID/placa, y un `Stack` para la opción de deshacer (Undo). Al deshacer una acción, se actualizan tanto la lista como el mapa para mantener los datos sincronizados.
 
----
+* **Módulo 9: Excepciones personalizadas**  
+  Se crearon y manejaron las tres excepciones pedidas:
+  * `StockInsuficienteException`: si se piden más repuestos de los que hay en bodega.
+  * `ClienteNoEncontradoException`: si se busca un código de cliente que no existe.
+  * `PagoInsuficienteException`: si el efectivo entregado en caja no cubre el total de la factura.  
+  Todas se capturan con bloques `try-catch` y se muestran con `JOptionPane` para evitar que el programa se caiga.
 
-### Paso 5: Órdenes de Trabajo y Concurrencia con Hilos (Módulos 5 y 10)
-Se genera la orden `ORD-001` seleccionando el cliente, vehículo, diagnóstico, servicios mecánicos y repuestos requeridos. Al presionar **"Procesar con Hilo (>= 5 seg)"**:
-* Se inicia el hilo en segundo plano simulando las etapas técnicas del servicio durante más de 5 segundos.
-* Se actualiza la barra de progreso en el EDT sin congelar la interfaz.
-* Se bloquea la ejecución duplicada.
-* Al concluir, la orden pasa a estado `Finalizada` y se descuentan las existencias del inventario una sola vez.
-![Órdenes de Trabajo y Multihilo](capturas/05_ordenes_trabajo.png)
-
----
-
-### Paso 6: Módulo de Facturación (Módulo 6 y Módulo 9)
-Permite facturar únicamente órdenes finalizadas. Calcula subtotales de servicios y repuestos, aplica el porcentaje de impuesto configurable (15% por defecto) y totaliza.
-* Si el cliente paga una cantidad menor al total, se dispara la excepción personalizada `PagoInsuficienteException` mostrando el mensaje sin cerrar el programa.
-* Al registrar un pago válido, se calcula el cambio a entregar y se emite la factura.
-![Facturación](capturas/06_facturacion.png)
+* **Módulo 10: Multihilos**  
+  La clase `ProcesoServicioHilo` implementa `Runnable` y simula la atención del vehículo en 10 pasos con pausas de 550 ms (duración total de 5.5 segundos). El avance se envía al EDT con `SwingUtilities.invokeLater` para actualizar la barra de progreso sin trabar la pantalla, y se valida que una misma orden no se procese dos veces al mismo tiempo.
 
 ---
 
-### Paso 7: Reportes Gráficos Java 2D (Módulo 7)
-Lienzo manual utilizando `JPanel`, `Graphics2D` y `paintComponent()`. Dibuja dos gráficos de barras alimentados en tiempo real por los datos en memoria:
-1. **Ingresos acumulados por servicio mecánico (L.)**.
-2. **Distribución de órdenes por estado (Pendiente, En proceso, Finalizada, Cancelada)**.
-![Reportes Gráficos Java 2D](capturas/07_reportes_graficos_java2d.png)
+## 5. Demostración del Sistema y Capturas de Pantalla
+Para la demostración en clase se siguió el flujo completo de trabajo, desde el registro inicial hasta la facturación y la visualización de los gráficos:
+
+### Paso 1: Registro y consulta de clientes
+Se captura el cliente Hector Murillo con código 'CLI-001'. La tabla refleja inmediatamente el registro.
+![Paso 1 Clientes](capturas/01_gestion_clientes.png)
+
+### Paso 2: Registro de vehículo asociado al propietario
+Se registra el vehículo Ford Escape año 2011 con placa 'JAM6446', seleccionando al cliente CLI-001 en el selector de propietarios.
+![Paso 2 Vehículos](capturas/02_gestion_vehiculos.png)
+
+### Paso 3: Catálogo de servicios mecánicos
+Visualización de los 5 servicios mecánicos base disponibles con sus precios unitarios y tiempos estimados.
+![Paso 3 Servicios](capturas/03_servicios_mecanicos.png)
+
+### Paso 4: Control de inventario y alertas
+El módulo de inventario muestra las existencias de filtros, aceites y pastillas de freno, permitiendo registrar entradas y mostrando el semáforo de estado de existencias.
+![Paso 4 Inventario](capturas/04_inventario_repuestos.png)
+
+### Paso 5: Creación de orden y procesamiento asíncrono con hilo
+Se genera la orden ORD-001 vinculando al cliente, vehículo, servicios y repuestos. Al presionar 'Procesar con Hilo (>= 5 seg)', la barra de progreso avanza en tiempo real mostrando los pasos técnicos, finaliza la orden y descuenta las existencias una sola vez.
+![Paso 5 Órdenes](capturas/05_ordenes_trabajo.png)
+
+### Paso 6: Liquidación y facturación
+Se selecciona la orden finalizada, calculando subtotales de L. 1,200.00 en servicios y L. 0.00 en repuestos. Con 15% de impuesto el total resulta en L. 1,380.00. Se demuestra el rechazo ante pagos inferiores (`PagoInsuficienteException`) y el cálculo exacto del cambio ante pagos válidos.
+![Paso 6 Facturación](capturas/06_facturacion.png)
+
+### Paso 7: Visualización de reportes Java 2D
+El canvas Java 2D procesa en tiempo real los registros en memoria para renderizar las barras de ingresos por servicio y el conteo de órdenes por estado.
+![Paso 7 Reportes](capturas/07_reportes_graficos_java2d.png)
 
 ---
 
-## 5. Instrucciones de Ejecución
+## 6. Instrucciones de Compilación y Ejecución
+El proyecto es compatible con Java 17 LTS o superior y cuenta con el archivo de configuración Maven `pom.xml` estándar para su apertura inmediata en NetBeans IDE.
 
-### Opción 1: Ejecución con Maven o NetBeans
-1. Abrir **NetBeans IDE**.
-2. Seleccionar **File -> Open Project** y elegir la carpeta del proyecto `AutoTechSolutions`.
-3. Hacer clic en **Run Project** (`F6`).
+### Ejecución en NetBeans IDE
+1. Abrir NetBeans IDE.
+2. Ir a **File -> Open Project** y seleccionar la carpeta del proyecto `Examen AutoTechSolutions`.
+3. Hacer clic derecho sobre el proyecto y presionar **Run** (o presionar la tecla `F6`).
 
-### Opción 2: Compilación y Ejecución por Terminal
+### Ejecución por Terminal
 ```bash
-# Compilar todo el proyecto
+# Compilar el proyecto hacia la carpeta bin
 javac -d bin $(find src/main/java -name "*.java")
 
-# Ejecutar la aplicación
+# Ejecutar la aplicación gráfica Swing
 java -cp bin main.Main
 ```
+
+---
+
+## 7. Conclusiones
+1. Se completaron los 10 módulos solicitados para el taller AutoTech Solutions, cumpliendo con las validaciones de datos, persistencia en memoria RAM y el manejo de excepciones sin que la aplicación se cierre ante errores.
+2. Se aplicó el patrón MVC separando la interfaz de la lógica. Con la clase `RepositorioGenerico<T>` se manejaron las estructuras vistas en clase: `ArrayList` para llenar las tablas, `HashMap` para buscar registros por código o placa de forma rápida, y `Stack` para implementar el botón de deshacer (Undo) restaurando los datos anteriores.
+3. El uso de hilos (`Runnable`) permitió simular el tiempo de servicio de la orden (más de 5 segundos) sin congelar la ventana, actualizando la barra de progreso mediante `SwingUtilities.invokeLater` en el EDT. Además, los reportes se dibujaron manualmente usando `Graphics2D` y `paintComponent` sin usar librerías externas.
