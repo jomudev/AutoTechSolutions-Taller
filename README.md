@@ -120,15 +120,6 @@ El proyecto es compatible con Java 17 LTS o superior y cuenta con el archivo de 
 2. Ir a **File -> Open Project** y seleccionar la carpeta del proyecto `Examen AutoTechSolutions`.
 3. Hacer clic derecho sobre el proyecto y presionar **Run** (o presionar la tecla `F6`).
 
-### Ejecución por Terminal
-```bash
-# Compilar el proyecto hacia la carpeta bin
-javac -d bin $(find src/main/java -name "*.java")
-
-# Ejecutar la aplicación gráfica Swing
-java -cp bin main.Main
-```
-
 ---
 
 ## 7. Conclusiones
