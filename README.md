@@ -1,3 +1,38 @@
+<!-- ENGLISH_EXECUTIVE_SUMMARY -->
+<div align="center">
+
+# AutoTech Solutions — Automotive Workshop Management System (Java / MVC / Multithreading)
+
+![Java](https://img.shields.io/badge/Java-Swing_%26_Java_2D-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-MVC_%2B_Generic_Repository-10B981?style=flat-square)
+![Concurrency](https://img.shields.io/badge/Concurrency-Runnable_Multithreading-2563EB?style=flat-square)
+![Maven](https://img.shields.io/badge/Build-Apache_Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
+
+</div>
+
+## English Executive Summary *(For International Technical Reviewers)*
+
+**AutoTech Solutions** is a comprehensive Java desktop application engineered with **Apache Maven** and **Swing (Nimbus Look & Feel)** to manage end-to-end operations for an automotive repair workshop — including clients, vehicles, mechanical services, spare parts inventory, work orders, billing, and dynamic statistical reports.
+
+### Core Software Engineering Highlights
+
+- **Strict Model-View-Controller (`MVC`) Architecture:** Clean separation between domain entities (`modelo/*`), central orchestration (`controlador/TallerControlador.java`), and Swing/Java 2D presentation (`vista/*`).
+- **Generic Repository & Data Structures (`repositorio/RepositorioGenerico.java`):** Implements a type-safe generic in-memory repository (`<T>`) backed by `ArrayList` for ordered storage, `HashMap` for `O(1)` ID indexing, and `Stack` to support transactional undo operations.
+- **Asynchronous Multithreading (`hilos/ProcesoServicioHilo.java`):** Uses `Runnable` background worker threads to process mechanical service execution pipelines concurrently without blocking the Swing Event Dispatch Thread (EDT).
+- **Custom Domain Exceptions (`excepciones/`):** Enforces business invariants via `ClienteNoEncontradoException`, `StockInsuficienteException`, and `PagoInsuficienteException`.
+- **Custom Graphics Rendering (`vista/CanvasReporte2D.java`):** Renders dynamic bar charts directly via **Java 2D** graphics without external charting libraries.
+
+### Quick Run (Maven)
+
+```bash
+mvn clean compile
+mvn exec:java -Dexec.mainClass="main.Main"
+```
+
+> Below is the full original academic engineering report (Spanish) including UML class diagrams and application screenshots.
+
+<hr />
+
 # Universidad Tecnológica de Honduras (UTH)
 ### Facultad de Ingeniería en Computación
 **Asignatura:** Programación Avanzada I  
